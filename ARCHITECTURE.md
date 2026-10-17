@@ -1,9 +1,48 @@
-# Architecture générale — Scanners
+# Scanners — Delivery Note Processing and Archiving — Architecture
 
-Application consacrée à des opérations de lecture et de collecte à l’aide de scanners.
+Administrative teams can process batches of scanned delivery notes without manually separating every PDF and filing every document. Automated extraction is paired with a review workflow for uncertain supplier matches, duplicates and documents requiring correction.
 
-L’arborescence sépare les composants d’interface, les traitements applicatifs, les éléments de configuration et les tests lorsqu’ils sont présents. Le parcours général relie une interface à des traitements et à une couche de données. Les contrats, règles métier, schémas de données, intégrations et paramètres internes ne sont pas décrits.
+## Components
 
-Formats techniques représentés dans la copie : Python, TypeScript, JavaScript, HTML, CSS, scripts shell, configuration textuelle.
+| Component | Responsibility |
+|---|---|
+| Processing backend | Python ingestion, OCR, extraction and document-classification services. |
+| Registry API | FastAPI access to document records, operations and administration. |
+| Registry interface | React/TypeScript browsing, search, review and settings screens. |
+| Document storage | Private PDFs, processing outputs and supplier-organized archive locations. |
+| Extraction adapters | Tesseract and server-side AI integration. |
 
-Cette présentation a été rédigée pour la version publique à partir des catégories de fichiers et de dossiers. Elle ne reproduit aucun document interne et ne décrit pas une application exécutable. Les noms spécifiques ont été remplacés par des noms génériques.
+## Main interactions
+
+```mermaid
+flowchart TD
+    N0["Scanned PDFs"]
+    N1["Intake and OCR"]
+    N2["Document extraction"]
+    N3["Supplier matching and review"]
+    N4["Document archive"]
+    N5["Operator interface"]
+    N6["Registry API"]
+    N7["Exception review"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N5 --> N6
+    N6 --> N4
+    N5 --> N7
+```
+
+## Responsibility boundaries
+
+- Uncertain extraction enters a review path. Operators can distinguish verified filing from results that still need attention.
+- Separate document processing from archive interaction. Users can consult the archive while background intake continues.
+- Make destructive operations explicit. Operators can inspect the intended scope before changing archive contents.
+
+## Constraints
+
+OCR and extracted information can be incomplete or incorrect. Review queues and access-controlled document operations remain necessary.
+
+## Technology
+
+Python, FastAPI, React, TypeScript, Tesseract OCR, model-assisted extraction and Docker.
